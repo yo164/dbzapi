@@ -1,0 +1,155 @@
+import { Character } from "../models/character.js";
+import { CharacterDetail } from "../models/characterDetail.js";
+import { Transformation } from "../models/transformation.js";
+import { Planet } from "../models/planet.js";
+
+const URL_GENERAL_PERSONAJES =
+    "https://dragonball-api.com/api/characters?limit=58";
+
+export function getAll() {
+
+    const array = [];
+
+    return fetch(URL_GENERAL_PERSONAJES)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Error al recibir los personajes");
+            }
+
+            return response.json();
+        })
+        .then(data => {
+
+            const personajes = data.items;
+
+            personajes.forEach(element => {
+
+                const character = new Character(
+                    element.id,
+                    element.name,
+                    element.ki,
+                    element.maxKi,
+                    element.race,
+                    element.gender,
+                    element.description,
+                    element.image,
+                    element.affiliation,
+                    element.deletedAt
+                );
+
+                array.push(character);
+            });
+
+            return array;
+        });
+}
+
+
+
+export function getById(id) {
+
+    const URL_PERSONAJE =
+        `https://dragonball-api.com/api/characters/${id}`;
+
+    return fetch(URL_PERSONAJE)
+        .then(response => {
+
+            if (!response.ok) {
+                throw new Error("Error al recibir el personaje");
+            }
+
+            return response.json();
+        })
+        .then(data => {
+
+            const transformations = [];
+
+            data.transformations.forEach(element => {
+
+                const transformation = new Transformation(
+                    element.id,
+                    element.name,
+                    element.image,
+                    element.ki,
+                    element.deletedAt
+                );
+
+                transformations.push(transformation);
+            });
+            const planeta = data.originPlanet;
+            const planet = new Planet(
+                planeta.id,
+                planeta.name,
+                planeta.description,
+                planeta.image,
+                planeta.deletedAt
+            )
+
+
+            const character = new CharacterDetail(
+                data.id,
+                data.name,
+                data.ki,
+                data.maxKi,
+                data.race,
+                data.gender,
+                data.description,
+                data.image,
+                data.affiliation,
+                data.deletedAt,
+                planet,
+                transformations
+            );
+
+            return character;
+        });
+}
+
+export function getByFilters(filters) {
+    if (filters === "") {
+        filters = "limit=58";
+    }
+
+    const URL_FILTRADO = `https://dragonball-api.com/api/characters?${filters}`;
+
+    const array = [];
+    return fetch(URL_FILTRADO)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("fallo al recibir filtrados");
+            }
+            return response.json();
+
+        })
+        .then(data => {
+            console.log(data);
+            let personajes ;
+            if(Array.isArray(data)){
+                personajes = data;
+            }else{
+                personajes = data.items;
+            }
+            
+
+            personajes.forEach(element => {
+
+                const character = new Character(
+                    element.id,
+                    element.name,
+                    element.ki,
+                    element.maxKi,
+                    element.race,
+                    element.gender,
+                    element.description,
+                    element.image,
+                    element.affiliation,
+                    element.deletedAt
+                );
+
+                array.push(character);
+            });
+
+            return array;
+        })
+
+}
